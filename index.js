@@ -59,8 +59,31 @@ const gameOptions = {
                     callback_data: "0",
                 }
             ]
+
         ]
     }
+}
+
+const againOptions = {
+    reply_markup:{
+        inline_keyboard: [
+            [
+                {
+                    text: "Qaytadan boshlash",
+                    callback_data: '/again'
+                },
+            ]
+        ]
+    }
+}
+
+const startGame = async (chatId) => {
+    await bot.sendMessage(chatId, "Kompyuter 0 dan 9 gacha son o'yladi. Siz o'sha sonni topishga harakt qiling.");
+
+            const randomNum = Math.floor(Math.random() * 10);
+            obj[chatId] = randomNum;
+
+            return bot.sendMessage(chatId, "To'g'ri sonni toping",gameOptions)
 }
 
 
@@ -100,13 +123,24 @@ const bootstrap = () => {
         }
 
         if (text === '/game') {
-            await bot.sendMessage(chatId, "Kompyuter 0 dan 9 gacha son o'yladi. Siz o'sha sonni topishga harakt qiling.");
-
-            const randomNum = Math.floor(Math.random() * 10);
-            obj[chatId] = randomNum;
-
-            return bot.sendMessage(chatId, "To'g'ri sonni toping",gameOptions)
+            startGame(chatId)
         }
+        
       });
+    bot.on("callback_query", msg => {
+        const data = msg.data
+        const chatId = msg.message.chat.id;
+        if (data === '/again') {
+            return startGame(chatId)
+        }
+        if(data == obj[chatId]){
+            return bot.sendMessage(
+                chatId,
+                `Tabriklaymiz siz to'g'ri javob berdingiz,kompyuter ${obj[chatId]} sonini tanlagan edi`
+            );
+        }else{
+            return bot.sendMessage(chatId, `Siz noto'g'ri son tanladingiz tanlagan soningiz ${data},kompyuter ${obj[chatId]} sonini tanlagan edi`,againOptions);
+        }
+    })
 }
  bootstrap();
